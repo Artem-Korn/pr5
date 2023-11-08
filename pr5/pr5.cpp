@@ -2,7 +2,6 @@
 
 int main()
 {
-	double difference = 0;
 	string input = "abcd1234;.";
 	string addition = "abcd1234;.abcd1234;.abcd1234;.abcd1234;.abcd1234;.abcd1234;.abcd";
 
