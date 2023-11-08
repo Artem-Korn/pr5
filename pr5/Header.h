@@ -17,6 +17,9 @@ class SHA_1 {
 	static unsigned long convertToWord32(unsigned char, unsigned char, unsigned char, unsigned char);
 	static unsigned char convertToWord8(unsigned long long int, int);
 	static vector<unsigned char> stringToBlock(string);
+	static void blockToChunk(vector<unsigned long>&, vector<unsigned char>);
+	static void extendTo80(vector<unsigned long>&);
+	static void setRegisters(vector<unsigned long>&, vector<unsigned long>&);
 	static string bitsetToHexString(vector<unsigned long>);
 public:
 	static string getHash(string);
