@@ -11,13 +11,13 @@
 using namespace std;
 
 class SHA_1 {
-	static const vector<bitset<32>> H;
-	static const vector<bitset<32>> K;
+	static const vector<unsigned long> H;
+	static const vector<unsigned long> K;
 
-	static bitset<32> convertToWord32(unsigned char, unsigned char, unsigned char, unsigned char);
+	static unsigned long convertToWord32(unsigned char, unsigned char, unsigned char, unsigned char);
 	static unsigned char convertToWord8(unsigned long long int, int);
 	static vector<unsigned char> stringToBlock(string);
-	static string bitsetToHexString(vector<bitset<32>>);
+	static string bitsetToHexString(vector<unsigned long>);
 public:
 	static string getHash(string);
 };

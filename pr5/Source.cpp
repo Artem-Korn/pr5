@@ -2,7 +2,7 @@
 #define BYTE 8
 
 // Registers init values
-const vector<bitset<32>> SHA_1::H({ 
+const vector<unsigned long> SHA_1::H({
     0x67452301,
     0xefcdab89,
     0x98badcfe,
@@ -11,14 +11,14 @@ const vector<bitset<32>> SHA_1::H({
 });
 
 // Const values
-const vector<bitset<32>> SHA_1::K({
+const vector<unsigned long> SHA_1::K({
     0x5a827999,
     0x6ed9eba1,
     0x8f1bbcdc,
     0xca62c1d6
 });
 
-bitset<32> SHA_1::convertToWord32(unsigned char a, unsigned char b, unsigned char c, unsigned char d)
+unsigned long SHA_1::convertToWord32(unsigned char a, unsigned char b, unsigned char c, unsigned char d)
 {
     return (a << 24 | b << 16 | c << 8 | d);
 }
@@ -30,22 +30,13 @@ unsigned char SHA_1::convertToWord8(unsigned long long int input, int part)
 
 string SHA_1::getHash(string input)
 {
-    using chrono::high_resolution_clock;
-    using chrono::duration_cast;
-    using chrono::duration;
-    using chrono::milliseconds;
-
-    auto t1 = high_resolution_clock::now();
     vector<unsigned char> block = stringToBlock(input);
-    auto t2 = high_resolution_clock::now();
-
-    duration<double, milli> ms_double = t2 - t1;
 
     // Break th block into an array of 'chunks' of 512 bits and each chunk into subarray of 16 32-bit 'words'
-    vector<vector<bitset<32>>> chanks(block.size() / 64);
+    vector<vector<unsigned long>> chanks(block.size() / 64);
 
     size_t chunk_index = 0;
-    vector<bitset<32>> prev_reg(SHA_1::H), reg(SHA_1::H);
+    vector<unsigned long> prev_reg(SHA_1::H), reg(SHA_1::H);
 
     for (size_t i = 0; i < chanks.size(); i++)
     {
@@ -64,11 +55,11 @@ string SHA_1::getHash(string input)
         // Extend each subarray to 80 words using bitwise operations
         for (size_t j = 16; j <= 79; j++)
         {
-            bitset<32> res = chanks[i][j - 3] ^ chanks[i][j - 8] ^ chanks[i][j - 14] ^ chanks[i][j - 16];
+            unsigned long res = chanks[i][j - 3] ^ chanks[i][j - 8] ^ chanks[i][j - 14] ^ chanks[i][j - 16];
             chanks[i].push_back(res << 1 | res >> 31);
         }
 
-        bitset<32> k, f;
+        unsigned long k, f;
 
         // Looping through each chunk: bitwise operations and variable reassigment
         for (size_t j = 0; j < 80; j++)
@@ -93,10 +84,7 @@ string SHA_1::getHash(string input)
                 f = reg[1] ^ reg[2] ^ reg[3];
                 k = SHA_1::K[3];
             }
-            k = reg[4].to_ullong() + f.to_ullong() + 
-                (reg[0] << 5 | reg[0] >> 27).to_ullong() + 
-                chanks[i][j].to_ullong() + 
-                k.to_ullong();
+            k = reg[4] + f + (reg[0] << 5 | reg[0] >> 27) + chanks[i][j] + k;
 
             reg[4] = reg[3];
             reg[3] = reg[2];
@@ -107,7 +95,7 @@ string SHA_1::getHash(string input)
 
         for (size_t i = 0; i < reg.size(); i++) 
         {
-            prev_reg[i] = reg[i].to_ullong() + prev_reg[i].to_ullong();
+            prev_reg[i] = reg[i] + prev_reg[i];
         }
 
         chunk_index += 64;
@@ -151,14 +139,14 @@ vector<unsigned char> SHA_1::stringToBlock(string input)
     return block;
 }
 
-string SHA_1::bitsetToHexString(vector<bitset<32>> bitset)
+string SHA_1::bitsetToHexString(vector<unsigned long> bitset)
 {
     stringstream stream;
 
     stream << setfill('0')  << hex;
     for (size_t i = 0; i < bitset.size(); i++)
     {
-        stream << setw(8) << uppercase << bitset[i].to_ullong();
+        stream << setw(8) << uppercase << bitset[i];
     }
 
     return stream.str();
