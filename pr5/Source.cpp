@@ -18,19 +18,28 @@ const vector<bitset<32>> SHA_1::K({
     0xca62c1d6
 });
 
-bitset<32> SHA_1::convertToWord32(bitset<8> a, bitset<8> b, bitset<8> c, bitset<8> d)
+bitset<32> SHA_1::convertToWord32(unsigned char a, unsigned char b, unsigned char c, unsigned char d)
 {
-    return (a.to_ullong() << 24 | b.to_ullong() << 16 | c.to_ullong() << 8 | d.to_ullong());
+    return (a << 24 | b << 16 | c << 8 | d);
 }
 
-bitset<8> SHA_1::convertToWord8(bitset<64> input, int part)
+unsigned char SHA_1::convertToWord8(unsigned long long int input, int part)
 {
-    return (input >> (part * 8)).to_ullong();
+    return (input >> (part * 8));
 }
 
 string SHA_1::getHash(string input)
 {
-    vector<bitset<BYTE>> block = stringToBlock(input);
+    using chrono::high_resolution_clock;
+    using chrono::duration_cast;
+    using chrono::duration;
+    using chrono::milliseconds;
+
+    auto t1 = high_resolution_clock::now();
+    vector<unsigned char> block = stringToBlock(input);
+    auto t2 = high_resolution_clock::now();
+
+    duration<double, milli> ms_double = t2 - t1;
 
     // Break th block into an array of 'chunks' of 512 bits and each chunk into subarray of 16 32-bit 'words'
     vector<vector<bitset<32>>> chanks(block.size() / 64);
@@ -109,9 +118,9 @@ string SHA_1::getHash(string input)
 }
 
 // Convert input string to binary block
-vector<bitset<8>> SHA_1::stringToBlock(string input)
+vector<unsigned char> SHA_1::stringToBlock(string input)
 {
-    vector<bitset<BYTE>> block;
+    vector<unsigned char> block;
     size_t input_len = input.length();
 
     block.reserve(input_len + BYTE);
@@ -119,21 +128,21 @@ vector<bitset<8>> SHA_1::stringToBlock(string input)
     // Convert ASCII codes to binary
     for (size_t i = 0; i < input_len; i++)
     {
-        block.push_back(bitset<BYTE>(input[i]));
+        block.push_back(input[i]);
     }
-    block.push_back(bitset<BYTE>(128));
+    block.push_back(128);
 
     // Pad the binary message with zeros until its mod 64 != 56
     size_t block_len = input_len + 1;
 
     while (block_len % 64 != 56) {
-        block.push_back(bitset<BYTE>());
+        block.push_back(0);
         block_len++;
     }
 
     // Add length of input in binary and pad zeros
-    bitset<64> test(input_len * BYTE);
-    
+    unsigned long long int test(input_len * BYTE);
+
     for (int i = BYTE - 1; i >= 0; i--)
     {
         block.push_back(convertToWord8(test, i));
@@ -193,6 +202,7 @@ void getTestResult(string name, string input)
     if (actual.compare(expected) == 0)
     {
         cout << "Test completed!" << endl;
+        cout << "actual:   " << actual << endl;
     }
     else
     {

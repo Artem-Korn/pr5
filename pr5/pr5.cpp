@@ -11,7 +11,7 @@ int main()
 		getTestResult("Test " + to_string(i), input);
 	}
 
-	cout << "Input text value: " << endl;
-	cin >> input;
+	cout << "Input text line: " << endl;
+	getline(cin, input);
 	getTestResult("Input Test", input);
 }
